@@ -46,6 +46,10 @@ export class PaperlessClient {
     }
 
     async getAuthToken(clientId, clientSecret, authCode) {
+        const clientSecretFoormattedRaw = `${clientId}${clientSecret}${authCode}`;
+        const clientSecretFormatted = crypto.createHash('sha512')
+            .update(clientSecretFoormattedRaw).digest('hex');
+
         const endpoint = 'https://paperless.com.ua/PplsService/oauth/token';
         let headers = new Headers();
         headers.append('Content-Type', 'application/x-www-form-urlencoded');
@@ -53,7 +57,7 @@ export class PaperlessClient {
         let urlencoded = new URLSearchParams();
         urlencoded.append('grant_type', 'authorization_code');
         urlencoded.append('client_id', clientId);
-        urlencoded.append('client_secret', clientSecret);
+        urlencoded.append('client_secret', clientSecretFormatted);
         urlencoded.append('code', authCode);
 
         let response = await fetch(endpoint, {
@@ -94,6 +98,7 @@ export class PaperlessClient {
         if (!response.ok) {
             throw new PaperlessClientError(`Upload failed: ${response.status} ${response.statusText}`);
         }
+        return await response.json();
     }
 
     async searchDocuments(clientId, accessToken, searchFilter) {
@@ -178,6 +183,7 @@ export class PaperlessClient {
         if (!response.ok) {
             throw new PaperlessClientError(`Rename document failed: ${response.status} ${response.statusText}`);
         }
+        return await response.json();
     }
 
     async trashOrDeleteDocument(clientId, accessToken, documentId) {
@@ -193,6 +199,7 @@ export class PaperlessClient {
         if (!response.ok) {
             throw new PaperlessClientError(`Remove document failed: ${response.status} ${response.statusText}`);
         }
+        return await response.json();
     }
 
     async restoreDocumentFromTrash(clientId, accessToken, documentId) {
@@ -208,6 +215,7 @@ export class PaperlessClient {
         if (!response.ok) {
             throw new PaperlessClientError(`Remove document failed: ${response.status} ${response.statusText}`);
         }
+        return await response.json();
     }
 
     async setDocumentSharingByUrl(clientId, accessToken, documentId, setEnabled) {
@@ -268,6 +276,7 @@ export class PaperlessClient {
         if (!response.ok) {
             throw new PaperlessClientError(`Signing document failed: ${response.status} ${response.statusText}`);
         }
+        return await response.json();
     }
 }
 
